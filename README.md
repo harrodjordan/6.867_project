@@ -61,3 +61,28 @@ False positives/false negatives, because in the clinical context false negatives
 Feature selection to refine features based on importance	
 
 ## Milestone 3
+
+Software Infrastructure: 
+
+All work will be completed in Python. Analysis of the signals to produce features can be accomplished with packages like numpy and scipy.
+
+Cost-Sensitive SVM: scikit-learn package sklearn.svm.SVM, which allows the specification of the parameter class_weight for cost sensitivity
+
+Recurrent Neural Network: RNN can be constructed in Keras
+
+Random Forest: scikit-learn package sklearn.ensemble.RandomForestClassifier, which allows for fairly specific control of the hyper-parameters of the trees
+
+Division of Labor:
+
+Jordan:  Will perform pre-processing on data for spectral features. Will implement the Cost-Sensitive SVM, perform parameter optimization, and look at false positives on this model. Will co-implement RNN with Daphne in Keras, co-perform feature extraction, and co-analyze false positives. 
+
+Daphne: Will perform pre-processing on data for temporal features. Will implement the Random Forest, perform parameter optimization, and look at false positives on this model.  Will co-implement RNN with Jordan in Keras, co-perform feature extraction, and co-analyze false positives. 
+
+Open Questions:
+
+What are the best choices of hyperparameters for each algorithm to be tested? 
+
+Are there “intelligent” ways we can pick parameters, or a range of parameters, rather than sweeping through a large number of possibilities? I’m thinking in particularly about the parameters for Random Forest, like maximum tree depth.
+
+Will spectral features be more informative than temporal, or vice versa? 
+

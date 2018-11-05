@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-#from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 
 def raw_data() :
 

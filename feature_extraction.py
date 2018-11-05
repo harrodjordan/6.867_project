@@ -13,9 +13,11 @@ def raw_data() :
 
 	name_list = dat[:,0]
 
-	dat_vals = dat[1:,1:].astype(np.float)
+	dat_vals = dat[1:,1:-1].astype(np.float)
 
-	return name_list, dat_vals
+	labels = dat[1::,-1].astype(np.int)
+
+	return dat_vals, labels
 
 # sp = np.fft.fft(dat_vals)
 # freq = np.fft.fftfreq(dat_vals.shape[-1])

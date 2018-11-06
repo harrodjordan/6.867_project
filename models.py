@@ -1,10 +1,10 @@
 import sklearn 
-import keras.layers as k
+#import keras.layers as k
 import matplotlib.pyplot as plt 
 import numpy 
 import os 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
+from sklearn import svm
 import pywt
 
 
@@ -27,12 +27,12 @@ class SVM():
 		self.clf = svm.LinearSVC(C=C)
 		
 
-	def train():
+	def train(self, X, y):
 		# fit the classifier
 		X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2)
-		self.clf = self.clf.fit(X,Y)
+		self.clf = self.clf.fit(X,y)
 
-	def test():
+	def test(self, X, true_labels):
 		prediction = self.clf.predict(X)
 		# get mean accuracy (not a good metric!)
 		score = self.clf.score(X, true_labels)

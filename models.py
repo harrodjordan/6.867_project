@@ -48,8 +48,8 @@ class RandomForest():
 
 	def train(self,X,Y):
 		# fit the classifier
-		X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2)
-		self.clf = self.clf.fit(X,Y)
+		X_train, X_valid, y_train, y_valid = train_test_split(X, Y, test_size=0.2)
+		self.clf = self.clf.fit(X_train, y_train)
 
 	# do we want to just spit out labels or testing accuracies?
 	# kind of an arbitrary choice
@@ -61,3 +61,6 @@ class RandomForest():
 		score = self.clf.score(X, true_labels)
 
 		return score
+
+def train_test_split(X, y, test_size=0.2) :
+	return X, 0, y, 0

@@ -11,7 +11,7 @@ def raw_data(two_cat=False) :
 
 	dat = df.values
 
-	name_list = dat[:,0]
+	name_list = dat[1:,0]
 
 	dat_vals = dat[1:,1:-1].astype(np.float)
 
@@ -20,4 +20,4 @@ def raw_data(two_cat=False) :
 	if two_cat :
 		labels = (labels==1).astype(float)
 
-	return dat_vals, labels
+	return dat_vals, labels, name_list

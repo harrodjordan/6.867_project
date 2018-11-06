@@ -63,4 +63,10 @@ class RandomForest():
 		return score
 
 def train_test_split(X, y, test_size=0.2) :
-	return X, 0, y, 0
+	# right now this just splits at the 80% line (no randomness)
+	split_at = int(X.shape[0] * (1 - test_size))
+	X_train = X[:split_at,:]
+	X_valid = X[split_at:,:]
+	y_train = y[:split_at]
+	y_valid = y[split_at:]
+	return X_train, X_valid, y_train, y_valid

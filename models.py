@@ -36,6 +36,7 @@ class SVM():
 		prediction = self.clf.predict(X)
 		# get mean accuracy (not a good metric!)
 		score = self.clf.score(X, true_labels)
+        return score
 
 
 

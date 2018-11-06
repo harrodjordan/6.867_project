@@ -8,7 +8,7 @@ from sklearn.svm import SVC
 import pywt
 
 
-class RNN():
+class ConvNet():
 
 	def __init__():
 		pass

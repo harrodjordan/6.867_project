@@ -46,15 +46,15 @@ class RandomForest():
 		# initialize classifier
 		self.clf = RandomForestClassifier(n_estimators=n_estimators)
 
-	def train(self,X,Y):
+	def train(self, X, y):
 		# fit the classifier
-		X_train, X_valid, y_train, y_valid = train_test_split(X, Y, test_size=0.2)
+		X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2)
 		self.clf = self.clf.fit(X_train, y_train)
 
 	# do we want to just spit out labels or testing accuracies?
 	# kind of an arbitrary choice
 	# we also care about things like TPR etc
-	def test(self,X, true_labels):
+	def test(self, X, true_labels):
 		# predict labels
 		prediction = self.clf.predict(X)
 		# get mean accuracy (not a good metric!)
@@ -64,6 +64,7 @@ class RandomForest():
 
 def train_test_split(X, y, test_size=0.2) :
 	# right now this just splits at the 80% line (no randomness)
+	# need to eventually make sure data from the same individual are in the same group
 	split_at = int(X.shape[0] * (1 - test_size))
 	X_train = X[:split_at,:]
 	X_valid = X[split_at:,:]

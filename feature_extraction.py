@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-def raw_data() :
+def raw_data(two_cat=False) :
 
 	N = 11500
 	d = 180
@@ -17,10 +17,7 @@ def raw_data() :
 
 	labels = dat[1::,-1].astype(np.int)
 
+	if two_cat :
+		labels = (labels==1).astype(float)
+
 	return dat_vals, labels
-
-# sp = np.fft.fft(dat_vals)
-# freq = np.fft.fftfreq(dat_vals.shape[-1])
-
-# plt.plot(freq, sp[1,:].real)
-# plt.show()

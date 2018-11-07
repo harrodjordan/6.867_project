@@ -79,6 +79,8 @@ class RandomForest():
     def train(self, X, y):
         # fit the classifier
         X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2)
+        self.X_valid = X_valid
+        self.y_valid = y_valid
         self.clf = self.clf.fit(X_train, y_train)
 
     # do we want to just spit out labels or testing accuracies?

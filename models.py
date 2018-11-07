@@ -1,11 +1,10 @@
 import sklearn 
-#import keras.layers as k
 import matplotlib.pyplot as plt 
-import numpy 
+import numpy as np
 import os 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
-import pywt
+from sklearn.metrics import precision_score, roc_curve, auc 
 
 
 class ConvNet():
@@ -23,7 +22,7 @@ class SVM():
 
     def __init__(self, C=0.001):
         # initialize classifier
-        self.clf = svm.LinearSVC(C=C)
+        self.clf = svm.SVC(C=C, class_weight='balanced')
 
 
     def train(self, X, y):
@@ -35,7 +34,38 @@ class SVM():
         prediction = self.clf.predict(X)
         # get mean accuracy (not a good metric!)
         score = self.clf.score(X, true_labels)
-        return score
+        precision = precision_score(true_labels, prediction)
+        return score, precision 
+
+    def roc_auc(self, X, true):
+        pred = self.clf.predict(X)
+        fpr, tpr, thresholds = roc_curve(true, pred)
+        auc_var = auc(fpr, tpr)
+        plt.plot(fpr, tpr, lw=1, alpha=0.3,label='ROC (AUC = %0.2f)' % (auc_var))
+        plt.show()
+
+    def plot_margin(self, X, y):
+        plt.scatter(X[:, 0], X[:, 1], c=y, s=30, cmap=plt.cm.Paired)
+
+        # plot the decision function
+        ax = plt.gca()
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
+
+        # create grid to evaluate model
+        xx = np.linspace(xlim[0], xlim[1], 30)
+        yy = np.linspace(ylim[0], ylim[1], 30)
+        YY, XX = np.meshgrid(yy, xx)
+        xy = np.vstack([XX.ravel(), YY.ravel()]).T
+        Z = self.clf.decision_function(xy).reshape(XX.shape)
+
+        # plot decision boundary and margins
+        ax.contour(XX, YY, Z, colors='k', levels=[-1, 0, 1], alpha=0.5,
+                   linestyles=['--', '-', '--'])
+        # plot support vectors
+        ax.scatter(clf.support_vectors_[:, 0], clf.support_vectors_[:, 1], s=100,
+                   linewidth=1, facecolors='none', edgecolors='k')
+        plt.show()
 
 
 
@@ -59,8 +89,9 @@ class RandomForest():
         prediction = self.clf.predict(X)
         # get mean accuracy (not a good metric!)
         score = self.clf.score(X, true_labels)
+        precision = precision_score(true_labels, prediction)
 
-        return score
+        return score, precision 
 
 def train_test_split(X, y, test_size=0.2) :
     # right now this just splits at the 80% line (no randomness)

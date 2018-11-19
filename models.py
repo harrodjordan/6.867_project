@@ -29,7 +29,8 @@ class ConvNet():
         X_train, X_valid, y_train, y_valid = train_test_split(X, y, name_list, test_size=0.2)
         self.clf.fit(X_train, y_train, epochs=10, batch_size=115)
 
-    def test():
+    def test(self, X, y, name_list):
+        X_train, X_valid, y_train, y_valid = train_test_split(X, y, name_list, test_size=0.2)
         self.clf.evalute(X_valid, y_valid, batch_size=115)
 
 

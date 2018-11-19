@@ -100,7 +100,7 @@ def train_test_split(X, y, name_list, test_size=0.2) :
 
     # need to make sure data from a single patient are all in the same category
     # each label is VXX.YYY, but with one to two Xs zero to three Ys
-    # so we take XXYYY to be a unique label for a patient (is this true??)
+    # so we take XXYYY to be a unique label for a patient (is this true??) (maybe lol)
     # we then sort the data by those labels so that all the data from a given
     # patient is reunited with its source. 
 

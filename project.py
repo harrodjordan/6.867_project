@@ -15,7 +15,6 @@ data, labels, name_list = feature_extraction.raw_data(two_cat = True)
 
 #print(name_list)
 
-#<<<<<<< HEAD
 # # Random Forest Model 
 
 # rf = models.RandomForest()
@@ -27,13 +26,11 @@ data, labels, name_list = feature_extraction.raw_data(two_cat = True)
 rf = models.RandomForest()
 rf.train(data, labels, name_list)
 sc = rf.test(rf.X_valid, rf.y_valid)
-#>>>>>>> 54a28e808d8e173343499aa4c750bc15ea381287
 
 # print('Random Forest Accuracy: ' + str(sc))
 # print('Random Forest Precision: ' + str(prec))
 # print('Random Forest Cross Validation Score: ' + str(cvsc))
 
-#<<<<<<< HEAD
 
 # SVM Model 
 #=======
@@ -61,7 +58,6 @@ cvsc = np.mean(cross_val_score(rf.clf, data, labels, cv=10))
 
 print('Random Forest Accuracy: ' + str(sc))
 print('Random Forest Cross Validation Score: ' + str(cvsc))
-#>>>>>>> 54a28e808d8e173343499aa4c750bc15ea381287
 
 svm = models.SVM()
 svm.train(data, labels, name_list)

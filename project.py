@@ -6,33 +6,37 @@ import feature_extraction
 from sklearn.model_selection import cross_val_score
 import numpy as np
 
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 
 # fun fact exactly 20% of the samples are seizure data
 
 data, labels, name_list = feature_extraction.raw_data(two_cat = True)
 
-<<<<<<< HEAD
+#print(name_list)
+
+#<<<<<<< HEAD
 # # Random Forest Model 
 
 # rf = models.RandomForest()
 # rf.train(data, labels)
 # sc, prec = rf.test(data, labels)
 
-# cvsc = np.mean(cross_val_score(rf.clf, data, labels, cv=10))
-=======
+# NOTE this does not prevent mixing of patients. I don't have the energy to fix it rn
+#=======
 rf = models.RandomForest()
-rf.train(data, labels)
+rf.train(data, labels, name_list)
 sc = rf.test(rf.X_valid, rf.y_valid)
->>>>>>> 54a28e808d8e173343499aa4c750bc15ea381287
+#>>>>>>> 54a28e808d8e173343499aa4c750bc15ea381287
 
 # print('Random Forest Accuracy: ' + str(sc))
 # print('Random Forest Precision: ' + str(prec))
 # print('Random Forest Cross Validation Score: ' + str(cvsc))
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
 
 # SVM Model 
-=======
+#=======
 # construct ROC curve for random forest
 rf_voting = rf.clf.predict_proba(data)
 
@@ -52,12 +56,15 @@ plt.ylabel('true positive rate')
 plt.title('ROC: Random Forest')
 plt.show()
 
+cvsc = np.mean(cross_val_score(rf.clf, data, labels, cv=10))
+
+
 print('Random Forest Accuracy: ' + str(sc))
 print('Random Forest Cross Validation Score: ' + str(cvsc))
->>>>>>> 54a28e808d8e173343499aa4c750bc15ea381287
+#>>>>>>> 54a28e808d8e173343499aa4c750bc15ea381287
 
 svm = models.SVM()
-svm.train(data, labels)
+svm.train(data, labels, name_list)
 svm_sc, svm_prec = svm.test(data,labels)
 
 svm_cvsc = np.mean(cross_val_score(svm.clf, data, labels, cv=10))

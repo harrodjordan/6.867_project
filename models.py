@@ -25,9 +25,9 @@ class SVM():
         self.clf = svm.SVC(C=C, class_weight='balanced')
 
 
-    def train(self, X, y):
+    def train(self, X, y, name_list):
         # fit the classifier
-        X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2)
+        X_train, X_valid, y_train, y_valid = train_test_split(X, y, name_list, test_size=0.2)
         self.clf = self.clf.fit(X,y)
 
     def test(self, X, true_labels):
@@ -76,9 +76,9 @@ class RandomForest():
         # initialize classifier
         self.clf = RandomForestClassifier(n_estimators=n_estimators)
 
-    def train(self, X, y):
+    def train(self, X, y, name_list):
         # fit the classifier
-        X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2)
+        X_train, X_valid, y_train, y_valid = train_test_split(X, y, name_list, test_size=0.2)
         self.X_valid = X_valid
         self.y_valid = y_valid
         self.clf = self.clf.fit(X_train, y_train)
@@ -95,10 +95,37 @@ class RandomForest():
 
         return score, precision 
 
-def train_test_split(X, y, test_size=0.2) :
+def train_test_split(X, y, name_list, test_size=0.2) :
     # right now this just splits at the 80% line (no randomness)
-    # need to eventually make sure data from the same individual are in the same group
-    split_at = int(X.shape[0] * (1 - test_size))
+
+    # need to make sure data from a single patient are all in the same category
+    # each label is VXX.YYY, but with one to two Xs zero to three Ys
+    # so we take XXYYY to be a unique label for a patient (is this true??)
+    # we then sort the data by those labels so that all the data from a given
+    # patient is reunited with its source. 
+
+    sort_by = list()
+
+    for x in name_list :
+    	labels_split = x.split('.')
+    	
+    	part1 = labels_split[1][1:]
+    	if len(labels_split) == 2 :
+    		part2 = ''
+    	else :
+    		part2 = labels_split[2]
+
+    	sort_by.append(int(part1 + part2))
+
+    order = np.argsort(np.asarray(sort_by))
+
+    X_sorted = X[order]
+    y_sorted = y[order]
+
+    # we split at the closest multiple of 23 to the requested split point
+
+    split_at = int(int(int(X.shape[0] * (1 - test_size)) / 23.0) * 23)
+
     X_train = X[:split_at,:]
     X_valid = X[split_at:,:]
     y_train = y[:split_at]

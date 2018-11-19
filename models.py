@@ -5,17 +5,32 @@ import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.metrics import precision_score, roc_curve, auc 
+import keras
+from keras.layers import Dense, Activation, Conv1D, Conv2D, MaxPooling1D, Dropout
+from keras.models import Sequential 
+from keras.optimizers import SGD
 
 
 class ConvNet():
     def __init__():
-        pass
+        self.history = keras.callbacks.History()
+        self.clf = Sequential()
+        self.clf.add(Dense(32, input_dim=178, activation='relu'))
+        self.clf.add(Dropout(0.5))
+        self.clf.add(Dense(64, input_dim=178, activation='relu'))
+        self.clf.add(Dropout(0.5))
+        self.clf.add(Flatten())
+        self.clf.add(Dense(1, input_dim=178, activation='sigmoid'))
+        self.sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+        self.model.compile(optimizer=sgd, loss='categorical_crossentropy',metrics=[history])
 
-    def train():
-        pass
+
+    def train(self, X, y, name_list):
+        X_train, X_valid, y_train, y_valid = train_test_split(X, y, name_list, test_size=0.2)
+        self.clf.fit(X_train, y_train, epochs=10, batch_size=115)
 
     def test():
-        pass
+        self.clf.evalute(X_valid, y_valid, batch_size=115)
 
 
 class SVM():

@@ -5,40 +5,116 @@ import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.metrics import precision_score, roc_curve, auc 
-# import keras
-# from keras.layers import Dense, Activation, Conv1D, Conv2D, MaxPooling1D, Dropout
-# from keras.models import Sequential 
-# from keras.optimizers import SGD
+import torch
+import torch.nn as nn
+import torch.nn.functional as F 
 
 
-# class ConvNet():
-#     def __init__():
-#         self.history = keras.callbacks.History()
-#         self.clf = Sequential()
-#         self.clf.add(Dense(32, input_dim=178, activation='relu'))
-#         self.clf.add(Dropout(0.5))
-#         self.clf.add(Dense(64, input_dim=178, activation='relu'))
-#         self.clf.add(Dropout(0.5))
-#         self.clf.add(Flatten())
-#         self.clf.add(Dense(1, input_dim=178, activation='sigmoid'))
-#         self.sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-#         self.model.compile(optimizer=sgd, loss='categorical_crossentropy',metrics=[history])
+class ConvNet():
+    def __init__(self):
+        super(CNNmodel, self).__init__()
+        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
+        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
+        self.fc1 = nn.Linear(320, 64)
+        self.fc2 = nn.Linear(64, 64)
+        self.fc3 = nn.Linear(64, 1)
 
+    def forward(self, x):
+        x = F.relu(F.max_pool2d(self.conv1(x), 2))
+        x = F.relu(F.max_pool2d(self.conv2(x), 2))
+        x = x.view(-1, 320)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
 
-#     def train(self, X, y, name_list):
-#         X_train, X_valid, y_train, y_valid = train_test_split(X, y, name_list, test_size=0.2)
-#         self.clf.fit(X_train, y_train, epochs=10, batch_size=115)
+        return F.log_softmax(x)
 
-#     def test(self, X, y, name_list):
-#         X_train, X_valid, y_train, y_valid = train_test_split(X, y, name_list, test_size=0.2)
-#         self.clf.evalute(X_valid, y_valid, batch_size=115)
+    def train(model, device, train_loader, optimizer, epoch):
+        model.train()
+        sum_num_correct = 0
+        sum_loss = 0
+        num_batches_since_log = 0
+        for batch_idx, (data, target) in enumerate(train_loader):
+            data, target = data.to(device), target.to(device)
+            optimizer.zero_grad()
+            output = model(data)
+            loss = F.nll_loss(output, target)
+            pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
+            correct = pred.eq(target.view_as(pred)).sum().item()
+            sum_num_correct += correct
+            sum_loss += loss.item()
+            num_batches_since_log += 1
+            
+            loss.backward()
+            optimizer.step()
+            
+            if batch_idx % 100 == 0:
+                print('Train Epoch: {} [{:05d}/{} ({:02.0f}%)]\tLoss: {:.6f}\tAccuracy: {:02.0f}%'.format(
+                    epoch, batch_idx * len(data), len(train_loader.dataset),
+                    100. * batch_idx / len(train_loader), sum_loss / num_batches_since_log, 
+                    100. * sum_num_correct / (num_batches_since_log * train_loader.batch_size))
+                )
+                sum_num_correct = 0
+                sum_loss = 0
+                num_batches_since_log = 0
+    
+    def test(model, device, test_loader, dataset_name="Test set"):
+        model.eval()
+        test_loss = 0
+        correct = 0
+        with torch.no_grad():
+            for data, target in test_loader:
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                test_loss += F.nll_loss(output, target, reduction='sum').item() # sum up batch loss
+                pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
+                correct += pred.eq(target.view_as(pred)).sum().item()
+
+        test_loss /= len(test_loader.dataset)
+        print('\n{}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(dataset_name, test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
+
+    def training_procedure(X, y, name_list):
+
+        args = dict()
+        args["seed"] = 73912
+        args["no_cuda"] = False
+        args["log_interval"] = 100
+        args["batch_size"] = 32
+        args["test-batch-size"] = 1000
+        
+
+        params = dict()
+        params["epochs"] = 10
+        params["lr"] = 0.1
+        
+
+        torch.manual_seed(args["seed"])
+        use_cuda = not args["no_cuda"] and torch.cuda.is_available()
+        device = torch.device("cuda" if use_cuda else "cpu")
+        
+
+        kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, name_list, test_size = 0.2)
+
+        train_loader = data_utils.TensorDataset(X_train, y_train)
+        test_loader = data_utils.TensorDataset(X_test, y_test)
+        
+        
+        model = CNNmodel().to(device)
+        optimizer = optim.SGD(model.parameters(), lr=params["lr"])
+
+        # Train the model
+        for epoch in range(1, params["epochs"] + 1):
+            train(model, device, train_loader, optimizer, epoch)
+ 
 
 
 class SVM():
 
     def __init__(self, C=0.001):
         # initialize classifier
-        self.clf = svm.SVC(C=C, class_weight='balanced')
+        self.clf = svm.SVC(C=C, class_weight='balanced', probability = True)
 
 
     def train(self, X, y, name_list):
@@ -132,6 +208,8 @@ def train_test_split(X, y, name_list, test_size=0.2) :
     		part2 = labels_split[2]
 
     	sort_by.append(int(part1 + part2))
+
+
 
     order = np.argsort(np.asarray(sort_by))
 

@@ -8,11 +8,14 @@ from sklearn.metrics import precision_score, roc_curve, auc
 import torch
 import torch.nn as nn
 import torch.nn.functional as F 
+import torch.utils.data as data_utils
+import torch.optim as optim
 
 
-class ConvNet():
+
+class ConvNet(nn.Module):
     def __init__(self):
-        super(CNNmodel, self).__init__()
+        super(ConvNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
         self.fc1 = nn.Linear(320, 64)
@@ -29,8 +32,13 @@ class ConvNet():
 
         return F.log_softmax(x)
 
-    def train(model, device, train_loader, optimizer, epoch):
-        model.train()
+class CNN():
+
+    def __init__(self):
+        self.model = ConvNet()
+
+    def train(self, model, device, train_loader, optimizer, epoch):
+        self.model.train()
         sum_num_correct = 0
         sum_loss = 0
         num_batches_since_log = 0
@@ -58,7 +66,7 @@ class ConvNet():
                 sum_loss = 0
                 num_batches_since_log = 0
     
-    def test(model, device, test_loader, dataset_name="Test set"):
+    def test(self, model, device, test_loader, dataset_name="Test set"):
         model.eval()
         test_loss = 0
         correct = 0
@@ -73,7 +81,7 @@ class ConvNet():
         test_loss /= len(test_loader.dataset)
         print('\n{}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(dataset_name, test_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
 
-    def training_procedure(X, y, name_list):
+    def training_procedure(self, X, y, name_list):
 
         args = dict()
         args["seed"] = 73912
@@ -101,12 +109,13 @@ class ConvNet():
         test_loader = data_utils.TensorDataset(X_test, y_test)
         
         
-        model = CNNmodel().to(device)
+        model = ConvNet().to(device)
         optimizer = optim.SGD(model.parameters(), lr=params["lr"])
 
         # Train the model
         for epoch in range(1, params["epochs"] + 1):
-            train(model, device, train_loader, optimizer, epoch)
+            self.train(model=model, device=device, train_loader=train_loader, optimizer=optimizer, epoch=epoch)
+            self.test(model, device, test_loader)
  
 
 

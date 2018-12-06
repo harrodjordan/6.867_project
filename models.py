@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F 
 import torch.utils.data as data_utils
 import torch.optim as optim
+from random import shuffle
 
 
 
@@ -196,7 +197,7 @@ class RandomForest():
 
         return score, precision 
 
-def train_test_split(X, y, name_list, test_size=0.2) :
+def train_test_split(X, y, name_list, test_size=0.2, randomize=True) :
     # right now this just splits at the 80% line (no randomness)
 
     # need to make sure data from a single patient are all in the same category
@@ -218,9 +219,22 @@ def train_test_split(X, y, name_list, test_size=0.2) :
 
     	sort_by.append(int(part1 + part2))
 
+    # get a list with one of each name
+    names_unique = list(set(sort_by))
+
+    def shuffle_helper(elem) :
+        return names_unique.index(elem[0])
 
 
-    order = np.argsort(np.asarray(sort_by))
+    # if desired, randomize the order
+    if randomize :
+        shuffle(names_unique)
+
+    indexing = range(0,len(sort_by))
+
+    sort_by, indexing = (list(t) for t in zip(*sorted(zip(sort_by, indexing),key=shuffle_helper)))
+
+    order = np.asarray(indexing)
 
     X_sorted = X[order]
     y_sorted = y[order]
@@ -234,3 +248,5 @@ def train_test_split(X, y, name_list, test_size=0.2) :
     y_train = y[:split_at]
     y_valid = y[split_at:]
     return X_train, X_valid, y_train, y_valid
+
+    

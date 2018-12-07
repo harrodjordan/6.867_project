@@ -1,0 +1,4 @@
+SVM Accuracy: 1.0
+SVM Precision: 1.0
+SVM Cross Validation Scores: [0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8]
+Mean SVM Cross Validation Scores: 0.8

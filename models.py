@@ -1,4 +1,6 @@
 import sklearn 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
 import numpy as np
 import os 
@@ -10,21 +12,24 @@ import torch.nn as nn
 import torch.nn.functional as F 
 import torch.utils.data as data_utils
 import torch.optim as optim
-
+from random import shuffle
+import PIL
+from PIL import Image
 
 
 class ConvNet(nn.Module):
     def __init__(self):
         super(ConvNet, self).__init__()
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
+        self.conv1 = nn.Conv1d(1, 10, kernel_size=5)
+        self.conv2 = nn.Conv1d(10, 20, kernel_size=5)
         self.fc1 = nn.Linear(320, 64)
         self.fc2 = nn.Linear(64, 64)
         self.fc3 = nn.Linear(64, 1)
+        print('Model initialized')
 
     def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2(x), 2))
+        x = F.relu(F.max_pool1d(self.conv1(x), 2))
+        x = F.relu(F.max_pool1d(self.conv2(x), 2))
         x = x.view(-1, 320)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -36,6 +41,21 @@ class CNN():
 
     def __init__(self):
         self.model = ConvNet()
+        
+    def load_data(self):
+        directory = '/home/paperspace/6.867_project/eeg_spec'
+        
+        names = os.listdir(directory)
+        
+        images = []
+        
+        for n in names:
+            file_name = directory + '/' + n
+            file = Image.open(file_name)
+            images = np.append(images,file) 
+            file.close()
+            
+        return images 
 
     def train(self, model, device, train_loader, optimizer, epoch):
         self.model.train()
@@ -102,6 +122,10 @@ class CNN():
         
 
         kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+        
+        #data = self.load_data()
+        
+        #data = torch.Tensor(X)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, name_list, test_size = 0.2)
 
@@ -111,31 +135,33 @@ class CNN():
         
         model = ConvNet().to(device)
         optimizer = optim.SGD(model.parameters(), lr=params["lr"])
+        
+        print('Model build')
 
         # Train the model
         for epoch in range(1, params["epochs"] + 1):
+            print('Model training')
             self.train(model=model, device=device, train_loader=train_loader, optimizer=optimizer, epoch=epoch)
+            print('Model testing')
             self.test(model, device, test_loader)
  
 
 
 class SVM():
 
-    def __init__(self, C=0.001):
+    def __init__(self, C=0.1):
         # initialize classifier
-        self.clf = svm.SVC(C=C, class_weight='balanced', probability = True)
-
+        self.clf = svm.SVC(C=C, kernel='poly', degree=4, probability = True)
 
     def train(self, X, y, name_list):
         # fit the classifier
-        X_train, X_valid, y_train, y_valid = train_test_split(X, y, name_list, test_size=0.2)
         self.clf = self.clf.fit(X,y)
 
-    def test(self, X, true_labels):
+    def test(self, X, y):
         prediction = self.clf.predict(X)
         # get mean accuracy (not a good metric!)
-        score = self.clf.score(X, true_labels)
-        precision = precision_score(true_labels, prediction)
+        score = self.clf.score(X, y)
+        precision = precision_score(y, prediction)
         return score, precision 
 
     def roc_auc(self, X, true):
@@ -143,8 +169,9 @@ class SVM():
         fpr, tpr, thresholds = roc_curve(true, pred)
         auc_var = auc(fpr, tpr)
         plt.plot(fpr, tpr, lw=1, alpha=0.3,label='ROC (AUC = %0.2f)' % (auc_var))
-        plt.show()
-
+        plt.savefig('ROC SVM V3')
+        plt.close()
+        
     def plot_margin(self, X, y):
         plt.scatter(X[:, 0], X[:, 1], c=y, s=30, cmap=plt.cm.Paired)
 
@@ -166,7 +193,8 @@ class SVM():
         # plot support vectors
         ax.scatter(clf.support_vectors_[:, 0], clf.support_vectors_[:, 1], s=100,
                    linewidth=1, facecolors='none', edgecolors='k')
-        plt.show()
+        plt.savefig('Margin SVM')
+        plt.close()
 
 
 
@@ -196,7 +224,7 @@ class RandomForest():
 
         return score, precision 
 
-def train_test_split(X, y, name_list, test_size=0.2) :
+def train_test_split(X, y, name_list, test_size=0.2, randomize=True) :
     # right now this just splits at the 80% line (no randomness)
 
     # need to make sure data from a single patient are all in the same category
@@ -208,19 +236,31 @@ def train_test_split(X, y, name_list, test_size=0.2) :
     sort_by = list()
 
     for x in name_list :
-    	labels_split = x.split('.')
-    	
-    	part1 = labels_split[1][1:]
-    	if len(labels_split) == 2 :
-    		part2 = ''
-    	else :
-    		part2 = labels_split[2]
+        labels_split = x.split('.')
+        part1 = labels_split[1][1:]
+        if len(labels_split) == 2 :
+            part2 = ''
+        else :
+            part2 = labels_split[2]
 
-    	sort_by.append(int(part1 + part2))
+        sort_by.append(int(part1 + part2))
+
+    # get a list with one of each name
+    names_unique = list(set(sort_by))
+
+    def shuffle_helper(elem) :
+        return names_unique.index(elem[0])
 
 
+    # if desired, randomize the order
+    if randomize :
+        shuffle(names_unique)
 
-    order = np.argsort(np.asarray(sort_by))
+    indexing = range(0,len(sort_by))
+
+    sort_by, indexing = (list(t) for t in zip(*sorted(zip(sort_by, indexing),key=shuffle_helper)))
+
+    order = np.asarray(indexing)
 
     X_sorted = X[order]
     y_sorted = y[order]

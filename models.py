@@ -17,6 +17,8 @@ import PIL
 from PIL import Image
 
 
+
+
 class ConvNet(nn.Module):
     def __init__(self):
         super(ConvNet, self).__init__()
@@ -256,6 +258,17 @@ def train_test_split(X, y, name_list, test_size=0.2, randomize=True) :
     if randomize :
         shuffle(names_unique)
 
+    # get a list with one of each name
+    names_unique = list(set(sort_by))
+
+    def shuffle_helper(elem) :
+        return names_unique.index(elem[0])
+
+
+    # if desired, randomize the order
+    if randomize :
+        shuffle(names_unique)
+
     indexing = range(0,len(sort_by))
 
     sort_by, indexing = (list(t) for t in zip(*sorted(zip(sort_by, indexing),key=shuffle_helper)))
@@ -274,3 +287,5 @@ def train_test_split(X, y, name_list, test_size=0.2, randomize=True) :
     y_train = y[:split_at]
     y_valid = y[split_at:]
     return X_train, X_valid, y_train, y_valid
+
+    

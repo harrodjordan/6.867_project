@@ -38,15 +38,15 @@ plt.title('Labeling in principle component space (Random Forest)')
 plt.show()
 
 # now, plot the curves
+t = np.linspace(0,1000,rf.X_valid.shape[1])
 plt.figure(figsize=(12,6))
 for i in range(rf.X_valid.shape[0]) :
     if labels_predict[i] :
-        plt.plot(rf.X_valid[i,:],'-r',alpha=0.3)
+        plt.plot(t,rf.X_valid[i,:],'-r',alpha=0.3)
     else :
-        plt.plot(rf.X_valid[i,:],'-b',alpha=0.3)
+        plt.plot(t,rf.X_valid[i,:],'-b',alpha=0.3)
 
-plt.xlabel('sample')
+plt.xlabel('time (ms)')
 plt.ylabel('signal')
-plt.title('Labeling of signals (RandomForest)')
+plt.title('Labeling of signals (Random Forest)')
 plt.show()
-

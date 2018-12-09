@@ -40,7 +40,7 @@ for th in range(len(thresholds)) :
 	thresh = thresholds[th]
 	pos = (rf_voting[:,1] > thresh).astype(int)
 	tpr[th] = np.sum(((pos == 1) & (labels == 1)))/np.sum(labels)
-	fpr[th] = np.sum(((pos == 1) * (labels == 0)))/np.sum((labels == 0).astype(int))
+	fpr[th] = np.sum(((pos == 1) * (labels == 0))).astype(float)/np.sum((labels == 0).astype(int))
 
 plt.plot(fpr,tpr,'-o')
 plt.xlabel('false positive rate')

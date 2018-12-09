@@ -9,6 +9,8 @@ from sklearn.decomposition import PCA
 
 data, labels, name_list = feature_extraction.raw_data(two_cat = True)
 
+X_train, X_test, y_train, y_test = train_test_split(data, labels, name_list, test_size = 0.2)
+
 pca = PCA()
 
 data_pca = pca.fit_transform(data)

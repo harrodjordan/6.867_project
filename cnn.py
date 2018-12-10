@@ -17,6 +17,7 @@ from keras.layers import Dense, Dropout
 from keras.layers import Embedding
 from keras.layers import Conv1D, GlobalAveragePooling1D, MaxPooling1D
 from sklearn.decomposition import PCA
+import seaborn as sns
 
 seq_length = 178
 
@@ -37,8 +38,13 @@ model.compile(loss='binary_crossentropy',
               metrics=['accuracy'])
 
 
-data, labels, name_list = feature_extraction.raw_data(two_cat = True)
+#data, labels, name_list = feature_extraction.raw_data(two_cat = True)
+data, labels, name_list = feature_extraction.features()
+
+
 X_train, X_test, y_train, y_test = train_test_split(data, labels, name_list, test_size = 0.2)
+
+
 
 X_train = X_train[:,np.newaxis,:]
 X_train = np.swapaxes(X_train, 1, 2)
@@ -63,4 +69,58 @@ plt.ylabel('True positive rate')
 plt.title('ROC curve')
 plt.legend(loc='best')
 plt.savefig('CNN ROC')
+plt.close()
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+epochs = range(1, len(loss) + 1)
+plt.plot(epochs, loss, color='red', label='Training loss')
+plt.plot(epochs, val_loss, color='green', label='Validation loss')
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.savefig('Training and Validation Loss')
+plt.close()
+
+acc = history.history['acc']
+val_acc = history.history['val_acc']
+plt.plot(epochs, acc, color='red', label='Training acc')
+plt.plot(epochs, val_acc, color='green', label='Validation acc')
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.savefig('Training and Validation Accuracy')
+plt.close()
+
+from keras.models import Model
+layer_outputs = [layer.output for layer in model.layers]
+activation_model = Model(inputs=model.input, outputs=layer_outputs)
+activations = activation_model.predict(X_train[10].reshape(1,178,1))
+ 
+def display_activation(activations, col_size, row_size, act_index): 
+    activation = activations[act_index]
+    activation_index=0
+    fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
+    for row in range(0,row_size):
+        for col in range(0,col_size):
+            ax[row][col].imshow(activation[0, :, :, activation_index], cmap='gray')
+            activation_index += 1
+
+display_activation(activations, 8, 8, 1)
+
+
+from sklearn.metrics import confusion_matrix
+Y_prediction = model.predict(X_valid)
+# Convert predictions classes to one hot vectors 
+Y_pred_classes = np.argmax(Y_prediction,axis = 1) 
+# Convert validation observations to one hot vectors
+Y_true = np.argmax(Y_valid,axis = 1) 
+# compute the confusion matrix
+confusion_mtx = confusion_matrix(Y_true, Y_pred_classes) 
+
+plt.figure(figsize=(10,8))
+sns.heatmap(confusion_mtx, annot=True, fmt="d");
+plt.savefig('Confusion Matrix')
 plt.close()

@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import feature_extraction
 from scipy.stats import norm
+from sklearn.metrics import precision_score
 
 data, labels, name_list = feature_extraction.raw_data(two_cat = True)
 
@@ -47,6 +48,8 @@ pred_test = (test_sigs > thresh[th_loc])
 acc_test = np.sum(pred_test == testY).astype(float)/(testY.size)
 print('The testing accuracy is ' + str(acc_test))
 
+print('The testing precision is ' + str(precision_score(testY,pred_test)))
+
 # plot of all data with line for threshold
 sigs = np.std(data, axis=1)
 means = np.mean(data, axis=1)
@@ -59,3 +62,40 @@ plt.ylim(-100,800)
 plt.xlabel('mean')
 plt.ylabel('standard deviation')
 plt.savefig('std_w_thresh.png')
+
+# tenfold cv score :
+
+accs = np.zeros((10,))
+
+for i in range(10) :
+    trainX, testX, trainY, testY = train_test_split(data, labels, name_list, test_size=.1)
+    train_sigs = np.std(trainX, axis=1)
+    test_sigs = np.std(testX, axis=1)
+
+
+    thresh = np.linspace(np.min(train_sigs),np.max(train_sigs),50)
+    tpr = np.zeros((thresh.shape))
+    fpr = np.zeros((thresh.shape))
+
+    for t in range((thresh).size) :
+        th = thresh[t]
+        labels_pred = (train_sigs > th)
+        tpr[t] = np.sum(((labels_pred == 1) & (trainY == 1)))/np.sum(trainY)
+        fpr[t] = np.sum(((labels_pred == 1) * (trainY == 0))).astype(float)/np.sum((trainY == 0).astype(int))
+
+    # distance to corner
+    d = np.sqrt((1-tpr)**2 + (1-(1-fpr))**2)
+
+    th_loc = np.argmin(d)
+
+    # what is the overall accuracy?
+    pred = (train_sigs > thresh[th_loc])
+    acc = np.sum(pred == trainY).astype(float)/(trainY.size)
+
+    # how do we do on test data?
+    pred_test = (test_sigs > thresh[th_loc])
+    acc_test = np.sum(pred_test == testY).astype(float)/(testY.size)
+
+    accs[i] = acc_test
+
+print('10 fold cv score is ' + str(np.mean(accs)))

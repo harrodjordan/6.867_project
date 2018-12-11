@@ -56,7 +56,7 @@ print('Random Forest Cross Validation Score: ' + str(cvsc))
 
 # SVM Model 
 #=======
-#X_train, X_test, y_train, y_test = train_test_split(data, labels, name_list, test_size = 0.2)
+X_train, X_test, y_train, y_test = train_test_split(data, labels, name_list, test_size = 0.2)
 
 svm = models.SVM()
 svm.train(X_train, y_train, name_list)

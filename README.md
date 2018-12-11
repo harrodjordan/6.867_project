@@ -1,6 +1,6 @@
 # Final Project for 6.867 - Machine Learning (MIT) 
 
-# Seizure Forecasting and Feature Extraction Using EEG Data
+# Seizure classification from EEG signals using various machine learning approaches
 
 ### Jordan Harrod and Daphne Schlesinger 
 

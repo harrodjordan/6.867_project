@@ -21,6 +21,8 @@ import seaborn as sns
 
 seq_length = 178
 
+#history = keras.callbacks.History()
+
 model = Sequential()
 model.add(Conv1D(64, 3, activation='relu', input_shape=(seq_length, 1)))
 model.add(Conv1D(64, 3, activation='relu'))
@@ -31,18 +33,19 @@ model.add(GlobalAveragePooling1D())
 model.add(Dropout(0.5))
 model.add(Dense(1, activation='sigmoid'))
 
-optim = keras.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
+optim = keras.optimizers.SGD(lr=0.01, decay=0.0, momentum=0.0, nesterov=True)
 
 model.compile(loss='binary_crossentropy',
               optimizer=optim,
-              metrics=['accuracy'])
+              metrics=['acc'])
 
 
-#data, labels, name_list = feature_extraction.raw_data(two_cat = True)
-data, labels, name_list = feature_extraction.features()
-
+data, labels, name_list = feature_extraction.raw_data(two_cat = True)
+#data = feature_extraction.features()
+#print(data.shape)
 
 X_train, X_test, y_train, y_test = train_test_split(data, labels, name_list, test_size = 0.2)
+print(X_train.shape)
 
 
 
@@ -52,7 +55,7 @@ X_train = np.swapaxes(X_train, 1, 2)
 X_test = X_test[:,np.newaxis,:]
 X_test = np.swapaxes(X_test, 1, 2)
 
-model.fit(X_train, y_train, batch_size=16, epochs=20)
+history = model.fit(X_train, y_train, batch_size=16, epochs=50, validation_split=0.1)
 score = model.evaluate(X_test, y_test, batch_size=16)
 print(score)
 
@@ -71,6 +74,7 @@ plt.legend(loc='best')
 plt.savefig('CNN ROC')
 plt.close()
 
+print(history.history)
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 epochs = range(1, len(loss) + 1)
@@ -99,24 +103,13 @@ layer_outputs = [layer.output for layer in model.layers]
 activation_model = Model(inputs=model.input, outputs=layer_outputs)
 activations = activation_model.predict(X_train[10].reshape(1,178,1))
  
-def display_activation(activations, col_size, row_size, act_index): 
-    activation = activations[act_index]
-    activation_index=0
-    fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
-    for row in range(0,row_size):
-        for col in range(0,col_size):
-            ax[row][col].imshow(activation[0, :, :, activation_index], cmap='gray')
-            activation_index += 1
-
-display_activation(activations, 8, 8, 1)
-
 
 from sklearn.metrics import confusion_matrix
-Y_prediction = model.predict(X_valid)
+Y_prediction = model.predict(X_test)
 # Convert predictions classes to one hot vectors 
 Y_pred_classes = np.argmax(Y_prediction,axis = 1) 
 # Convert validation observations to one hot vectors
-Y_true = np.argmax(Y_valid,axis = 1) 
+Y_true = np.argmax(y_test) 
 # compute the confusion matrix
 confusion_mtx = confusion_matrix(Y_true, Y_pred_classes) 
 

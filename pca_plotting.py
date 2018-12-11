@@ -15,6 +15,7 @@ rf.train(data, labels, name_list)
 sc = rf.test(rf.X_valid, rf.y_valid)
 
 labels_predict =  rf.clf.predict(rf.X_valid)
+print(labels_predict.size)
 
 pca = PCA()
 
